@@ -1,279 +1,764 @@
 <!DOCTYPE html>
 <html lang="my">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>KP VIP Admin Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body {
-      font-family: sans-serif;
-      max-width: 900px;
-      margin: 20px auto;
-      padding: 0 10px;
+    :root {
+      --primary: #2563eb;
+      --primary-soft: #dbeafe;
+      --danger: #ef4444;
+      --bg: #0f172a;
+      --card-bg: #0b1220;
+      --border: #1f2937;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
     }
-    h1 { text-align: center; }
-    .card {
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      padding: 15px;
-      margin-bottom: 20px;
-    }
-    label { display: block; margin-top: 8px; }
-    input, textarea {
-      width: 100%;
-      padding: 6px;
-      margin-top: 4px;
+
+    * {
       box-sizing: border-box;
     }
-    button {
-      margin-top: 10px;
-      padding: 8px 12px;
-      cursor: pointer;
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1d2538, #020617 60%);
+      color: var(--text-main);
+      min-height: 100vh;
     }
+
+    .wrapper {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .title-block h1 {
+      font-size: 24px;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      color: #bbf7d0;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .small-tag {
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      padding: 16px 16px 14px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.8);
+    }
+
+    .card h2 {
+      margin: 0 0 6px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card small {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-size: 13px;
+    }
+
+    .input {
+      width: 100%;
+      margin-top: 4px;
+      padding: 7px 9px;
+      border-radius: 8px;
+      border: 1px solid #1f2937;
+      background: #020617;
+      color: var(--text-main);
+      font-size: 13px;
+      outline: none;
+      transition: border 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+
+    .input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4);
+      background: #020617;
+    }
+
     .row {
       display: flex;
-      gap: 20px;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
     }
+
     .row .card {
-      flex: 1;
+      flex: 1 1 260px;
     }
-    .log {
+
+    .btn {
+      margin-top: 12px;
+      padding: 7px 12px;
+      font-size: 13px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, #2563eb, #22c55e);
+      color: white;
+      font-weight: 500;
+      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
+      transition: transform 0.12s, box-shadow 0.12s, opacity 0.1s;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 30px rgba(37, 99, 235, 0.5);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+      opacity: 0.9;
+      box-shadow: 0 10px 20px rgba(37, 99, 235, 0.35);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border-color: #374151;
+      color: var(--text-main);
+      box-shadow: none;
+    }
+
+    .btn-secondary:hover {
+      background: #020617;
+      transform: none;
+      box-shadow: 0 0 0 1px #374151;
+    }
+
+    .btn-danger {
+      background: transparent;
+      border-color: rgba(239, 68, 68, 0.7);
+      color: #fecaca;
+      box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.5);
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.15);
+    }
+
+    .pill-field {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
       font-size: 12px;
-      background: #f5f5f5;
-      padding: 10px;
-      white-space: pre-wrap;
-      max-height: 250px;
-      overflow-y: auto;
+      color: var(--text-muted);
     }
-    #panel { display: none; }
+
+    .pill-field span {
+      padding: 1px 7px;
+      border-radius: 999px;
+      border: 1px solid #374151;
+    }
+
+    .user-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .user-panel-header h2 {
+      margin: 0;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .filter-row .input {
+      max-width: 220px;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(34, 197, 94, 0.6);
+      background: rgba(22, 163, 74, 0.12);
+      color: #bbf7d0;
+    }
+
+    .status-chip.expired {
+      border-color: rgba(239, 68, 68, 0.7);
+      background: rgba(239, 68, 68, 0.12);
+      color: #fecaca;
+    }
+
+    .status-chip span {
+      opacity: 0.9;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    .status-dot.expired {
+      background: #ef4444;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    th, td {
+      padding: 6px 6px;
+      border-bottom: 1px solid #111827;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th {
+      font-size: 12px;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: #020617;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tbody tr:hover td {
+      background: rgba(15, 23, 42, 0.8);
+    }
+
+    .username-col {
+      font-weight: 500;
+      font-size: 13px;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+    }
+
+    .dim {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .user-table-wrapper {
+      max-height: 360px;
+      overflow: auto;
+      margin-top: 4px;
+      border-radius: 10px;
+      border: 1px solid #111827;
+      background: rgba(15, 23, 42, 0.85);
+    }
+
+    .empty {
+      padding: 12px 4px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .tag {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid #1f2937;
+      background: #020617;
+      color: #9ca3af;
+    }
+
+    @media (max-width: 640px) {
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .user-table-wrapper {
+        max-height: 260px;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>KP VIP Admin Panel</h1>
+  <div class="wrapper">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>
+          KP VIP Admin
+          <span class="badge">Premium</span>
+        </h1>
+        <p class="subtitle">Username / Password ကို အလွယ်တကူ စီမံခန့်ခွဲဖို့ Panel ဖြစ်ပါတယ်။</p>
+      </div>
+      <div class="top-actions">
+        <button id="btnAdminSecret" class="btn btn-secondary" style="margin-top:0;">
+          🔐 Admin Login
+        </button>
+        <span class="small-tag" id="adminStatus">🔒 Admin: Locked</span>
+        <span class="small-tag">API: <b>/kpvip/*.php</b></span>
+      </div>
+    </div>
 
-  <div class="card" id="loginCard">
-    <h2>Admin Login</h2>
-    <p>Cloudflare Worker ထဲမှာ သတ်ထားတဲ့ <code>ADMIN_SECRET</code> ကို ဒီမှာရိုက်ပေးရမယ်။</p>
-    <label>Admin Secret
-      <input id="adminSecret" type="password" placeholder="e.g. myadmin123">
-    </label>
-    <button id="btnAdminLogin">Login</button>
-    <p id="loginStatus"></p>
-  </div>
-
-  <div id="panel">
+    <!-- Top row: Create + Renew/Delete -->
     <div class="row">
+      <!-- Create -->
       <div class="card">
         <h2>အသစ် User ဖန်တီးမယ်</h2>
+        <small>Username, Password, Expire Days သတ်မှတ်ပြီး VIP User ဖန်တီးပါ။ (1DV – Login ဝင်တဲ့နေ့ကစ Expire စပါမယ်)</small>
+
         <label>Username
-          <input id="c_username" placeholder="user1">
+          <input id="c_username" class="input" placeholder="eg. kp001" />
         </label>
         <label>Password
-          <input id="c_password" placeholder="123456">
+          <input id="c_password" class="input" placeholder="eg. 123456" />
         </label>
-        <label>Plan
-          <input id="c_plan" value="VIP">
+        <label>Days (Expire အထိ)
+          <input id="c_days" class="input" type="number" value="30" min="1" />
         </label>
-        <label>Days (Expire)
-          <input id="c_days" type="number" value="30">
-        </label>
-        <label>VPN Config
-          <textarea id="c_vpnConfig" rows="4" placeholder="OVPN / config text"></textarea>
-        </label>
-        <button id="btnCreate">Create User</button>
+
+        <div class="pill-field">
+          <span>ဖန်တီးသွားတဲ့ User ကို List ထဲမှာ ​ကြည့်ရရှင်းအောင် အပေါ်ဆုံးခန်းမှာ ပြသပေးသည် 👆</span>
+        </div>
+
+        <button id="btnCreate" class="btn">
+          ✓ Create User
+        </button>
       </div>
 
+      <!-- Renew & Delete -->
       <div class="card">
-        <h2>User Renew / ပြင်မယ်</h2>
-        <label>Username
-          <input id="e_username">
-        </label>
-        <label>Extra Days (ထပ်တိုး)
-          <input id="e_days" type="number" value="30">
-        </label>
-        <label>New Plan (optional)
-          <input id="e_plan" placeholder="VIP / VVIP (ချင်ရင် ပြင်)">
-        </label>
-        <label>New VPN Config (optional)
-          <textarea id="e_vpnConfig" rows="4" placeholder="မလိုရင် ပြန်မရေးသက်မှတ်နေသလိုပဲ ထား"></textarea>
-        </label>
-        <button id="btnEdit">Renew / Update</button>
+        <h2>User Renew / Delete</h2>
+        <small>ရှိပြီးသား User တွေကို နေ့ထပ်တိုး / ဖျက်ဖို့ အသုံးပြုပါ။</small>
 
-        <h2 style="margin-top: 20px;">User ဖျက်မယ်</h2>
-        <label>Username
-          <input id="d_username">
+        <label>Username (Renew)
+          <input id="e_username" class="input" placeholder="eg. kp001" />
         </label>
-        <button id="btnDelete">Delete User</button>
+        <label>Extra Days
+          <input id="e_days" class="input" type="number" value="30" min="1" />
+        </label>
+        <button id="btnEdit" class="btn btn-secondary">
+          ⟳ Renew / Update
+        </button>
+
+        <hr style="border:none;border-top:1px solid #1f2937;margin:14px 0 10px;">
+
+        <label>Username (Delete)
+          <input id="d_username" class="input" placeholder="eg. kp001" />
+        </label>
+        <button id="btnDelete" class="btn btn-danger">
+          ✕ Delete User
+        </button>
       </div>
     </div>
 
-    <div class="card">
-      <h2>User ရှိ/မရှိ စစ်မယ်</h2>
-      <label>Username
-        <input id="q_username">
-      </label>
-      <button id="btnCheck">Check User</button>
-      <pre id="userInfo" class="log"></pre>
-    </div>
+    <!-- Middle row: Check user + User list -->
+    <div class="row">
+      <!-- Check user -->
+      <div class="card" style="flex: 0.9 1 250px;">
+        <h2>User ရှိ/မရှိ စစ်မယ်</h2>
+        <small>VPN App မှာလည်း ဒီ endpoint ကိုသုံးထားတယ်။</small>
 
-    <div class="card">
-      <h2>Log</h2>
-      <pre id="log" class="log"></pre>
+        <label>Username
+          <input id="q_username" class="input" placeholder="eg. kp001" />
+        </label>
+        <button id="btnCheck" class="btn btn-secondary">
+          ? Check User
+        </button>
+
+        <pre id="userInfo" class="mono" style="margin-top:10px; font-size:12px; background:#020617; padding:8px; border-radius:8px; border:1px solid #1f2937; max-height:190px; overflow:auto;"></pre>
+      </div>
+
+      <!-- User list -->
+      <div class="card" style="flex: 1.3 1 320px;">
+        <div class="user-panel-header">
+          <div>
+            <h2>User List</h2>
+            <small>နောက်ဆုံး ဖန်တီးထားသော User တွေကို အပေါ်ဆုံးကနေ စုထားထားပါတယ်။</small>
+          </div>
+          <button id="btnList" class="btn btn-secondary" style="margin-top:0;">
+            ↻ Refresh
+          </button>
+        </div>
+
+        <div class="filter-row">
+          <input id="searchBox" class="input" placeholder="Username ဖြင့်ရှာမယ်..." />
+          <span class="tag" id="summaryTag">Loading…</span>
+        </div>
+
+        <div id="userList" class="user-table-wrapper">
+          <div class="empty">User List ပြသဖို့ Loading လုပ်နေပါသည်…</div>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
-    // မင်း Worker API base URL
-    const API_BASE = "https://kpadmin.kpwork.qzz.io/kpvip";
+    // API base ကို domain မဆိုအလုပ်လုပ်အောင် relative သတ်မယ်
+    const API_BASE = "/kpvip";
 
-    function log(msg) {
-      const el = document.getElementById("log");
-      el.textContent += msg + "\n";
-      el.scrollTop = el.scrollHeight;
-    }
-
-    function setLoggedIn(flag) {
-      document.getElementById("panel").style.display = flag ? "block" : "none";
-    }
-
+    // ===== Admin Secret helpers =====
     function getAdminSecret() {
       return localStorage.getItem("ADMIN_SECRET") || "";
     }
 
-    function saveAdminSecret(secret) {
+    function setAdminSecret(secret) {
       localStorage.setItem("ADMIN_SECRET", secret);
     }
 
-    // Admin Login button
-    document.getElementById("btnAdminLogin").onclick = () => {
-      const secret = document.getElementById("adminSecret").value.trim();
-      const statusEl = document.getElementById("loginStatus");
-      if (!secret) {
-        statusEl.textContent = "Secret မထည့်ရသေးဘူး";
-        return;
+    function updateAdminStatus() {
+      const el = document.getElementById("adminStatus");
+      if (getAdminSecret()) {
+        el.textContent = "✅ Admin: Logged in";
+      } else {
+        el.textContent = "🔒 Admin: Locked";
       }
-      saveAdminSecret(secret);
-      statusEl.textContent = "Secret သိမ်းပြီး ✔ Admin panel ထဲသွားလို့ရပြီ";
-      setLoggedIn(true);
-      log("Admin login OK (local only, Worker အနေနဲ့တော့ header နဲ့ verify မယ်)");
+    }
+
+    async function requireAdminSecret() {
+      let secret = getAdminSecret();
+      if (!secret) {
+        secret = prompt("KP Admin Secret ထည့်ပါ");
+        if (!secret) return null;
+        secret = secret.trim();
+        if (!secret) return null;
+        setAdminSecret(secret);
+      }
+      updateAdminStatus();
+      return secret;
+    }
+
+    document.getElementById("btnAdminSecret").onclick = async () => {
+      const current = getAdminSecret();
+      const s = prompt("KP Admin Secret ထည့်/ပြန်ပြင်ပါ", current || "");
+      if (!s) return;
+      setAdminSecret(s.trim());
+      updateAdminStatus();
+      alert("Admin Secret သိမ်းပြီးပါပြီ");
     };
 
-    // Helper: POST to Worker with admin secret
-    async function apiPost(path, body) {
-      const secret = getAdminSecret();
-      if (!secret) {
-        alert("Admin secret မသတ်ထားသေးဘူး");
+    // ===== Helper functions =====
+    function toast(msg) {
+      alert(msg);
+    }
+
+    function formatDate(ts) {
+      if (!ts) return "-";
+      try {
+        return new Date(ts * 1000).toLocaleString();
+      } catch {
+        return "-";
+      }
+    }
+
+    function daysLeft(expireAt) {
+      if (!expireAt) return null;
+      const now = Math.floor(Date.now() / 1000);
+      const diff = expireAt - now;
+      const d = Math.ceil(diff / 86400);
+      return d;
+    }
+
+    async function postForm(path, bodyObj, needSecret = true) {
+      const url = API_BASE + path;
+
+      const headers = {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+      };
+
+      if (needSecret) {
+        const secret = await requireAdminSecret();
+        if (!secret) {
+          toast("Admin Secret မထည့်လို့ Panel ကိုသုံးလို့ မရဘူး");
+          return null;
+        }
+        headers["x-admin-secret"] = secret;
+      } else {
+        const s = getAdminSecret();
+        if (s) headers["x-admin-secret"] = s;
+      }
+
+      let res;
+      try {
+        res = await fetch(url, {
+          method: "POST",
+          headers,
+          body: new URLSearchParams(bodyObj)
+        });
+      } catch (e) {
+        console.error("Network error:", e);
+        toast("Network error: " + e.message);
         return null;
       }
-      const url = API_BASE + path;
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-          "x-admin-secret": secret
-        },
-        body: new URLSearchParams(body)
-      });
+
       let data;
       try {
         data = await res.json();
       } catch (e) {
-        data = { status: "error", message: "Invalid JSON", raw: await res.text() };
+        const raw = await res.text();
+        console.error("Invalid JSON:", raw);
+        data = { status: "error", message: "Invalid JSON", raw };
       }
-      log(path + " => " + JSON.stringify(data));
       return data;
     }
 
-    // Create user
+    async function callList() {
+      return await postForm("/list.php", {}, true);
+    }
+
+    // ===== User List Rendering =====
+    let currentUsers = [];
+
+    function renderUserTable(filterText = "") {
+      const container = document.getElementById("userList");
+      const summaryTag = document.getElementById("summaryTag");
+      container.innerHTML = "";
+
+      let users = [...currentUsers];
+
+      users.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+      if (filterText) {
+        const f = filterText.toLowerCase();
+        users = users.filter(u => (u.username || "").toLowerCase().includes(f));
+      }
+
+      summaryTag.textContent = users.length
+        ? `Total: ${users.length} user(s)`
+        : "User မရှိသေးဘူး";
+
+      if (!users.length) {
+        const div = document.createElement("div");
+        div.className = "empty";
+        div.textContent = "User မတွေ့ပါ။";
+        container.appendChild(div);
+        return;
+      }
+
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      thead.innerHTML = `
+        <tr>
+          <th>Username</th>
+          <th>Created</th>
+          <th>Expire</th>
+          <th>အခြေအနေ</th>
+        </tr>`;
+      table.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+
+      for (const u of users) {
+        const tr = document.createElement("tr");
+
+        const d = daysLeft(u.expireAt || 0);
+        const isExpired = d !== null && (isNaN(d) || d <= 0);
+
+        const created = formatDate(u.createdAt);
+        const expire = u.expireAt ? formatDate(u.expireAt) : "Not started";
+
+        tr.innerHTML = `
+          <td class="username-col mono">${u.username || "-"}</td>
+          <td class="mono dim">${created}</td>
+          <td class="mono dim">${expire}</td>
+          <td></td>
+        `;
+
+        const statusTd = tr.lastElementChild;
+        const chip = document.createElement("div");
+        chip.className = "status-chip" + (isExpired ? " expired" : "");
+        const dot = document.createElement("span");
+        dot.className = "status-dot" + (isExpired ? " expired" : "");
+        const text = document.createElement("span");
+
+        if (!u.expireAt) {
+          text.textContent = "Not started (no login)";
+        } else if (isExpired) {
+          text.textContent = "Expired";
+        } else {
+          text.textContent = `${d} day(s) left`;
+        }
+
+        chip.appendChild(dot);
+        chip.appendChild(text);
+        statusTd.appendChild(chip);
+
+        tbody.appendChild(tr);
+      }
+
+      table.appendChild(tbody);
+      container.appendChild(table);
+    }
+
+    async function refreshUserList() {
+      const summaryTag = document.getElementById("summaryTag");
+      summaryTag.textContent = "Loading…";
+      const data = await callList();
+      if (!data || data.status !== "ok") {
+        summaryTag.textContent = "Load fail";
+        const container = document.getElementById("userList");
+        container.innerHTML = "";
+        const div = document.createElement("div");
+        div.className = "empty";
+        div.textContent = "User List load မအောင်မြင်ပါ: " + (data && data.message || "unknown");
+        container.appendChild(div);
+        return;
+      }
+      currentUsers = data.users || [];
+      renderUserTable(document.getElementById("searchBox").value.trim());
+    }
+
+    // ===== Buttons =====
     document.getElementById("btnCreate").onclick = async () => {
       const username = document.getElementById("c_username").value.trim();
       const password = document.getElementById("c_password").value.trim();
-      const plan = document.getElementById("c_plan").value.trim();
       const days = document.getElementById("c_days").value.trim();
-      const vpnConfig = document.getElementById("c_vpnConfig").value;
 
       if (!username || !password || !days) {
-        alert("username / password / days သုံးခုလုံးဖြည့်ပေးပါ");
+        toast("username / password / days သုံးခုလုံး ဖြည့်ပေးပါ");
         return;
       }
 
-      const data = await apiPost("/create.php", {
-        username,
-        password,
-        plan,
-        days,
-        vpnConfig
-      });
-
+      const data = await postForm("/create.php", { username, password, days }, true);
       if (data && data.status === "ok") {
-        alert("User ဖန်တီးပြီး: " + username);
+        toast("User ဖန်တီးပြီး: " + username);
+        const now = Math.floor(Date.now() / 1000);
+        currentUsers.push({
+          username,
+          password,
+          createdAt: now,
+          expireAt: data.expireAt || null
+        });
+        renderUserTable(document.getElementById("searchBox").value.trim());
       } else if (data) {
-        alert("Create Fail: " + (data.message || "unknown error"));
+        toast("Create Fail: " + (data.message || "unknown error"));
+      } else {
+        toast("Create Fail: Network error");
       }
     };
 
-    // Edit / Renew user
     document.getElementById("btnEdit").onclick = async () => {
       const username = document.getElementById("e_username").value.trim();
       const days = document.getElementById("e_days").value.trim();
-      const plan = document.getElementById("e_plan").value.trim();
-      const vpnConfig = document.getElementById("e_vpnConfig").value;
 
       if (!username || !days) {
-        alert("username / days ဖြည့်ပါ");
+        toast("username / days ဖြည့်ပါ");
         return;
       }
 
-      const body = {
-        username,
-        days
-      };
-      if (plan) body.plan = plan;
-      if (vpnConfig) body.vpnConfig = vpnConfig;
-
-      const data = await apiPost("/edit.php", body);
+      const data = await postForm("/edit.php", { username, days }, true);
       if (data && data.status === "ok") {
-        alert("User updated: " + username);
+        toast("User renewed: " + username);
+        refreshUserList();
       } else if (data) {
-        alert("Edit Fail: " + (data.message || "unknown error"));
+        toast("Renew Fail: " + (data.message || "unknown error"));
+      } else {
+        toast("Renew Fail: Network error");
       }
     };
 
-    // Delete user
     document.getElementById("btnDelete").onclick = async () => {
       const username = document.getElementById("d_username").value.trim();
       if (!username) {
-        alert("username ဖြည့်ပါ");
+        toast("username ဖြည့်ပါ");
         return;
       }
       const ok = confirm("User " + username + " ကို တကယ်ဖျက်မလား?");
       if (!ok) return;
 
-      const data = await apiPost("/delete.php", { username });
+      const data = await postForm("/delete.php", { username }, true);
       if (data && data.status === "ok") {
-        alert("User deleted: " + username);
+        toast("User deleted: " + username);
+        currentUsers = currentUsers.filter(u => u.username !== username);
+        renderUserTable(document.getElementById("searchBox").value.trim());
       } else if (data) {
-        alert("Delete Fail: " + (data.message || "unknown error"));
+        toast("Delete Fail: " + (data.message || "unknown error"));
+      } else {
+        toast("Delete Fail: Network error");
       }
     };
 
-    // Check user
+    // user_exist.php -> admin header မလိုပေမယ့် ရှိရင် ထပ်ပို့မယ်
     document.getElementById("btnCheck").onclick = async () => {
       const username = document.getElementById("q_username").value.trim();
       if (!username) {
-        alert("username ဖြည့်ပါ");
+        toast("username ဖြည့်ပါ");
         return;
       }
-      const data = await apiPost("/user_exist.php", { username });
+      const data = await postForm("/user_exist.php", { username }, false);
       const el = document.getElementById("userInfo");
       el.textContent = JSON.stringify(data, null, 2);
     };
 
-    // page load အချိန်မှာ admin secret ရှိသလောက် auto login
+    document.getElementById("btnList").onclick = async () => {
+      await refreshUserList();
+    };
+
+    document.getElementById("searchBox").addEventListener("input", (e) => {
+      renderUserTable(e.target.value.trim());
+    });
+
     window.addEventListener("load", () => {
-      if (getAdminSecret()) {
-        setLoggedIn(true);
-        log("Loaded with existing admin secret");
-      }
+      updateAdminStatus();
+      refreshUserList();
     });
   </script>
 </body>
