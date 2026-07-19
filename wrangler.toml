@@ -1,0 +1,7 @@
+name = "kpvip-api"
+main = "src/worker.js"
+compatibility_date = "2025-11-30"
+
+[[kv_namespaces]]
+binding = "USERS_KV"
+id = "63d58f45fd0a41f68f79ebf0cde2b76e"

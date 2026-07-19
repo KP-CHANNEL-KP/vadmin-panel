@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+  <meta charset="UTF-8">
+  <title>KP VIP Admin Panel</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 0 10px;
+    }
+    h1 { text-align: center; }
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    label { display: block; margin-top: 8px; }
+    input, textarea {
+      width: 100%;
+      padding: 6px;
+      margin-top: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    .row {
+      display: flex;
+      gap: 20px;
+    }
+    .row .card {
+      flex: 1;
+    }
+    .log {
+      font-size: 12px;
+      background: #f5f5f5;
+      padding: 10px;
+      white-space: pre-wrap;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+    #panel { display: none; }
+  </style>
+</head>
+<body>
+  <h1>KP VIP Admin Panel</h1>
+
+  <div class="card" id="loginCard">
+    <h2>Admin Login</h2>
+    <p>Cloudflare Worker ထဲမှာ သတ်ထားတဲ့ <code>ADMIN_SECRET</code> ကို ဒီမှာရိုက်ပေးရမယ်။</p>
+    <label>Admin Secret
+      <input id="adminSecret" type="password" placeholder="e.g. myadmin123">
+    </label>
+    <button id="btnAdminLogin">Login</button>
+    <p id="loginStatus"></p>
+  </div>
+
+  <div id="panel">
+    <div class="row">
+      <div class="card">
+        <h2>အသစ် User ဖန်တီးမယ်</h2>
+        <label>Username
+          <input id="c_username" placeholder="user1">
+        </label>
+        <label>Password
+          <input id="c_password" placeholder="123456">
+        </label>
+        <label>Plan
+          <input id="c_plan" value="VIP">
+        </label>
+        <label>Days (Expire)
+          <input id="c_days" type="number" value="30">
+        </label>
+        <label>VPN Config
+          <textarea id="c_vpnConfig" rows="4" placeholder="OVPN / config text"></textarea>
+        </label>
+        <button id="btnCreate">Create User</button>
+      </div>
+
+      <div class="card">
+        <h2>User Renew / ပြင်မယ်</h2>
+        <label>Username
+          <input id="e_username">
+        </label>
+        <label>Extra Days (ထပ်တိုး)
+          <input id="e_days" type="number" value="30">
+        </label>
+        <label>New Plan (optional)
+          <input id="e_plan" placeholder="VIP / VVIP (ချင်ရင် ပြင်)">
+        </label>
+        <label>New VPN Config (optional)
+          <textarea id="e_vpnConfig" rows="4" placeholder="မလိုရင် ပြန်မရေးသက်မှတ်နေသလိုပဲ ထား"></textarea>
+        </label>
+        <button id="btnEdit">Renew / Update</button>
+
+        <h2 style="margin-top: 20px;">User ဖျက်မယ်</h2>
+        <label>Username
+          <input id="d_username">
+        </label>
+        <button id="btnDelete">Delete User</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>User ရှိ/မရှိ စစ်မယ်</h2>
+      <label>Username
+        <input id="q_username">
+      </label>
+      <button id="btnCheck">Check User</button>
+      <pre id="userInfo" class="log"></pre>
+    </div>
+
+    <div class="card">
+      <h2>Log</h2>
+      <pre id="log" class="log"></pre>
+    </div>
+  </div>
+
+  <script>
+    // မင်း Worker API base URL
+    const API_BASE = "https://kpadmin.kpwork.qzz.io/kpvip";
+
+    function log(msg) {
+      const el = document.getElementById("log");
+      el.textContent += msg + "\n";
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function setLoggedIn(flag) {
+      document.getElementById("panel").style.display = flag ? "block" : "none";
+    }
+
+    function getAdminSecret() {
+      return localStorage.getItem("ADMIN_SECRET") || "";
+    }
+
+    function saveAdminSecret(secret) {
+      localStorage.setItem("ADMIN_SECRET", secret);
+    }
+
+    // Admin Login button
+    document.getElementById("btnAdminLogin").onclick = () => {
+      const secret = document.getElementById("adminSecret").value.trim();
+      const statusEl = document.getElementById("loginStatus");
+      if (!secret) {
+        statusEl.textContent = "Secret မထည့်ရသေးဘူး";
+        return;
+      }
+      saveAdminSecret(secret);
+      statusEl.textContent = "Secret သိမ်းပြီး ✔ Admin panel ထဲသွားလို့ရပြီ";
+      setLoggedIn(true);
+      log("Admin login OK (local only, Worker အနေနဲ့တော့ header နဲ့ verify မယ်)");
+    };
+
+    // Helper: POST to Worker with admin secret
+    async function apiPost(path, body) {
+      const secret = getAdminSecret();
+      if (!secret) {
+        alert("Admin secret မသတ်ထားသေးဘူး");
+        return null;
+      }
+      const url = API_BASE + path;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+          "x-admin-secret": secret
+        },
+        body: new URLSearchParams(body)
+      });
+      let data;
+      try {
+        data = await res.json();
+      } catch (e) {
+        data = { status: "error", message: "Invalid JSON", raw: await res.text() };
+      }
+      log(path + " => " + JSON.stringify(data));
+      return data;
+    }
+
+    // Create user
+    document.getElementById("btnCreate").onclick = async () => {
+      const username = document.getElementById("c_username").value.trim();
+      const password = document.getElementById("c_password").value.trim();
+      const plan = document.getElementById("c_plan").value.trim();
+      const days = document.getElementById("c_days").value.trim();
+      const vpnConfig = document.getElementById("c_vpnConfig").value;
+
+      if (!username || !password || !days) {
+        alert("username / password / days သုံးခုလုံးဖြည့်ပေးပါ");
+        return;
+      }
+
+      const data = await apiPost("/create.php", {
+        username,
+        password,
+        plan,
+        days,
+        vpnConfig
+      });
+
+      if (data && data.status === "ok") {
+        alert("User ဖန်တီးပြီး: " + username);
+      } else if (data) {
+        alert("Create Fail: " + (data.message || "unknown error"));
+      }
+    };
+
+    // Edit / Renew user
+    document.getElementById("btnEdit").onclick = async () => {
+      const username = document.getElementById("e_username").value.trim();
+      const days = document.getElementById("e_days").value.trim();
+      const plan = document.getElementById("e_plan").value.trim();
+      const vpnConfig = document.getElementById("e_vpnConfig").value;
+
+      if (!username || !days) {
+        alert("username / days ဖြည့်ပါ");
+        return;
+      }
+
+      const body = {
+        username,
+        days
+      };
+      if (plan) body.plan = plan;
+      if (vpnConfig) body.vpnConfig = vpnConfig;
+
+      const data = await apiPost("/edit.php", body);
+      if (data && data.status === "ok") {
+        alert("User updated: " + username);
+      } else if (data) {
+        alert("Edit Fail: " + (data.message || "unknown error"));
+      }
+    };
+
+    // Delete user
+    document.getElementById("btnDelete").onclick = async () => {
+      const username = document.getElementById("d_username").value.trim();
+      if (!username) {
+        alert("username ဖြည့်ပါ");
+        return;
+      }
+      const ok = confirm("User " + username + " ကို တကယ်ဖျက်မလား?");
+      if (!ok) return;
+
+      const data = await apiPost("/delete.php", { username });
+      if (data && data.status === "ok") {
+        alert("User deleted: " + username);
+      } else if (data) {
+        alert("Delete Fail: " + (data.message || "unknown error"));
+      }
+    };
+
+    // Check user
+    document.getElementById("btnCheck").onclick = async () => {
+      const username = document.getElementById("q_username").value.trim();
+      if (!username) {
+        alert("username ဖြည့်ပါ");
+        return;
+      }
+      const data = await apiPost("/user_exist.php", { username });
+      const el = document.getElementById("userInfo");
+      el.textContent = JSON.stringify(data, null, 2);
+    };
+
+    // page load အချိန်မှာ admin secret ရှိသလောက် auto login
+    window.addEventListener("load", () => {
+      if (getAdminSecret()) {
+        setLoggedIn(true);
+        log("Loaded with existing admin secret");
+      }
+    });
+  </script>
+</body>
+</html>
