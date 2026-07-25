@@ -189,6 +189,23 @@
       background: rgba(239, 68, 68, 0.15);
     }
 
+    .btn-warning {
+      background: transparent;
+      border-color: rgba(234, 179, 8, 0.7);
+      color: #fde68a;
+      box-shadow: 0 0 0 1px rgba(234, 179, 8, 0.5);
+    }
+
+    .btn-warning:hover {
+      background: rgba(234, 179, 8, 0.15);
+    }
+
+    .btn-xs {
+      margin-top: 0;
+      padding: 3px 8px;
+      font-size: 11px;
+    }
+
     .pill-field {
       display: flex;
       gap: 8px;
@@ -258,6 +275,23 @@
 
     .status-dot.expired {
       background: #ef4444;
+    }
+
+    .device-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      border: 1px solid #374151;
+      color: var(--text-muted);
+    }
+
+    .device-chip.bound {
+      border-color: rgba(59, 130, 246, 0.6);
+      background: rgba(37, 99, 235, 0.12);
+      color: #bfdbfe;
     }
 
     table {
@@ -376,7 +410,7 @@
         </label>
 
         <div class="pill-field">
-          <span>ဖန်တီးသွားတဲ့ User ကို List ထဲမှာ ​ကြည့်ရရှင်းအောင် အပေါ်ဆုံးခန်းမှာ ပြသပေးသည် 👆</span>
+          <span>ဖန်တီးသွားတဲ့ User ကို List ထဲမှာ ​ကြည့်ရရှင်းအောင် အပေါ်ဆုံးခန်းမှာ ပြသပေးသည် 👆</span>
         </div>
 
         <button id="btnCreate" class="btn">
@@ -386,8 +420,8 @@
 
       <!-- Renew & Delete -->
       <div class="card">
-        <h2>User Renew / Delete</h2>
-        <small>ရှိပြီးသား User တွေကို နေ့ထပ်တိုး / ဖျက်ဖို့ အသုံးပြုပါ။</small>
+        <h2>User Renew / Delete / Device</h2>
+        <small>ရှိပြီးသား User တွေကို နေ့ထပ်တိုး / ဖျက် / Device binding ပြန် Reset လုပ်ဖို့ အသုံးပြုပါ။</small>
 
         <label>Username (Renew)
           <input id="e_username" class="input" placeholder="eg. kp001" />
@@ -397,6 +431,16 @@
         </label>
         <button id="btnEdit" class="btn btn-secondary">
           ⟳ Renew / Update
+        </button>
+
+        <hr style="border:none;border-top:1px solid #1f2937;margin:14px 0 10px;">
+
+        <label>Username (Reset Device)
+          <input id="r_username" class="input" placeholder="eg. kp001" />
+        </label>
+        <small style="display:block;margin-top:4px;">User ဖုန်းအသစ်လဲသုံးချင်ရင် / ဖုန်းအဟောင်းက login lock ဖြစ်နေရင် ဒီခလုတ်နဲ့ binding ကို ရှင်းပေးပါ။</small>
+        <button id="btnResetDevice" class="btn btn-warning">
+          📱 Reset Device
         </button>
 
         <hr style="border:none;border-top:1px solid #1f2937;margin:14px 0 10px;">
@@ -564,6 +608,30 @@
       return await postForm("/list.php", {}, true);
     }
 
+    // ===== Device Reset (used by both the form button and per-row buttons) =====
+    async function resetDeviceFor(username) {
+      if (!username) {
+        toast("username ဖြည့်ပါ");
+        return false;
+      }
+      const ok = confirm("User \"" + username + "\" ရဲ့ Device binding ကို ရှင်းမလား?\n(နောက်တစ်ကြိမ် login ဝင်တဲ့ ဖုန်းအသစ်ကို အလိုအလျောက် မှတ်ပါမယ်)");
+      if (!ok) return false;
+
+      const data = await postForm("/edit.php", { username, resetDevice: "1" }, true);
+      if (data && data.status === "ok") {
+        toast("Device binding ရှင်းပြီးပါပြီ: " + username);
+        const u = currentUsers.find(x => x.username === username);
+        if (u) u.deviceId = null;
+        renderUserTable(document.getElementById("searchBox").value.trim());
+        return true;
+      } else if (data) {
+        toast("Reset Device Fail: " + (data.message || "unknown error"));
+      } else {
+        toast("Reset Device Fail: Network error");
+      }
+      return false;
+    }
+
     // ===== User List Rendering =====
     let currentUsers = [];
 
@@ -601,6 +669,8 @@
           <th>Created</th>
           <th>Expire</th>
           <th>အခြေအနေ</th>
+          <th>Device</th>
+          <th>Action</th>
         </tr>`;
       table.appendChild(thead);
 
@@ -620,9 +690,16 @@
           <td class="mono dim">${created}</td>
           <td class="mono dim">${expire}</td>
           <td></td>
+          <td></td>
+          <td></td>
         `;
 
-        const statusTd = tr.lastElementChild;
+        const cells = tr.children;
+        const statusTd = cells[3];
+        const deviceTd = cells[4];
+        const actionTd = cells[5];
+
+        // Status chip
         const chip = document.createElement("div");
         chip.className = "status-chip" + (isExpired ? " expired" : "");
         const dot = document.createElement("span");
@@ -640,6 +717,30 @@
         chip.appendChild(dot);
         chip.appendChild(text);
         statusTd.appendChild(chip);
+
+        // Device chip
+        const devChip = document.createElement("span");
+        if (u.deviceId) {
+          devChip.className = "device-chip bound";
+          const shortId = String(u.deviceId).length > 10
+            ? String(u.deviceId).slice(0, 10) + "…"
+            : u.deviceId;
+          devChip.textContent = "📱 " + shortId;
+          devChip.title = u.deviceId;
+        } else {
+          devChip.className = "device-chip";
+          devChip.textContent = "Unbound";
+        }
+        deviceTd.appendChild(devChip);
+
+        // Per-row reset device button (only useful if a device is bound)
+        const resetBtn = document.createElement("button");
+        resetBtn.className = "btn btn-warning btn-xs";
+        resetBtn.textContent = "Reset";
+        resetBtn.disabled = !u.deviceId;
+        if (!u.deviceId) resetBtn.style.opacity = "0.4";
+        resetBtn.onclick = () => resetDeviceFor(u.username);
+        actionTd.appendChild(resetBtn);
 
         tbody.appendChild(tr);
       }
@@ -685,7 +786,8 @@
           username,
           password,
           createdAt: now,
-          expireAt: data.expireAt || null
+          expireAt: data.expireAt || null,
+          deviceId: null
         });
         renderUserTable(document.getElementById("searchBox").value.trim());
       } else if (data) {
@@ -713,6 +815,11 @@
       } else {
         toast("Renew Fail: Network error");
       }
+    };
+
+    document.getElementById("btnResetDevice").onclick = async () => {
+      const username = document.getElementById("r_username").value.trim();
+      await resetDeviceFor(username);
     };
 
     document.getElementById("btnDelete").onclick = async () => {
